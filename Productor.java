@@ -8,7 +8,6 @@ public class Productor {
     public static void main(String[] args) throws IOException {
         List<Persona> personas = leerPersonasDeCSV("data.csv");
 
-        // Asegurarse de que hay suficientes personas para distribuir entre los nodos
         if (personas.size() < 20) {
             System.err.println("No hay suficientes datos para distribuir entre los nodos.");
             return;
@@ -17,18 +16,25 @@ public class Productor {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Servidor iniciado en el puerto " + PORT);
 
-            // Aceptar conexiones de dos nodos
-            try (Socket nodo1Socket = serverSocket.accept();
-                 ObjectOutputStream nodo1Out = new ObjectOutputStream(nodo1Socket.getOutputStream());
-                 Socket nodo2Socket = serverSocket.accept();
-                 ObjectOutputStream nodo2Out = new ObjectOutputStream(nodo2Socket.getOutputStream())) {
+            // Aceptar conexión del primer nodo
+            Socket nodo1Socket = serverSocket.accept();
+            ObjectOutputStream nodo1Out = new ObjectOutputStream(nodo1Socket.getOutputStream());
+            System.out.println("Primer nodo conectado.");
 
-                System.out.println("Nodos conectados.");
+            // Aceptar conexión del segundo nodo
+            Socket nodo2Socket = serverSocket.accept();
+            ObjectOutputStream nodo2Out = new ObjectOutputStream(nodo2Socket.getOutputStream());
+            System.out.println("Segundo nodo conectado.");
 
-                // Envío de datos a los nodos
-                nodo1Out.writeObject(new ArrayList<>(personas.subList(0, 10)));
-                nodo2Out.writeObject(new ArrayList<>(personas.subList(10, 20)));
-            }
+            // Envío de datos a los nodos
+            nodo1Out.writeObject(new ArrayList<>(personas.subList(0, 10)));
+            nodo2Out.writeObject(new ArrayList<>(personas.subList(10, 20)));
+
+            // Cerrar recursos
+            nodo1Out.close();
+            nodo1Socket.close();
+            nodo2Out.close();
+            nodo2Socket.close();
         }
     }
 

@@ -3,20 +3,14 @@ import java.net.*;
 import java.util.List;
 
 public class Nodo implements Runnable {
-    private final String host;
-    private final int port;
+    private static final String SERVER_IP = "192.168.0.3";  // Dirección IP del servidor
+    private static final int PORT = 12345;  // Puerto al que se conectarán los nodos
 
-    public Nodo(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    @Override
     public void run() {
-        try (Socket socket = new Socket(host, port);
+        try (Socket socket = new Socket(SERVER_IP, PORT);
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
-            System.out.println("Conectado al servidor.");
+            System.out.println("Conectado al servidor " + SERVER_IP + ".");
             // Recepción de datos desde el servidor
             List<Persona> personas = (List<Persona>) in.readObject();
 
@@ -30,11 +24,12 @@ public class Nodo implements Runnable {
             }
 
         } catch (IOException | ClassNotFoundException e) {
+            System.err.println("No se pudo conectar al servidor en " + SERVER_IP + ":" + PORT);
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
-        new Thread(new Nodo("localhost", 12345)).start();
+        new Thread(new Nodo()).start();
     }
 }
